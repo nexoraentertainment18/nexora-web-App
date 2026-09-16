@@ -1,0 +1,171 @@
+name: Deploy
+
+# develop -> dev environment, main -> prod environment.
+# Each push runs the tests, rolls the new backend image out on ECS, then publishes the React app.
+on:
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+# Deploys of the same branch run one at a time, in order
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # lets the workflow sign in to AWS through OIDC, so no AWS keys are stored in GitHub
+
+env:
+  AWS_REGION: eu-north-1
+  ECR_REPOSITORY: nexora-backend
+  ENV_NAME: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy to ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+    needs: test
+    if: github.ref_name == 'develop' || github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+      url: ${{ steps.stack.outputs.AppUrl }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # Built first so a broken frontend stops the deploy before anything changes in AWS
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_TMDB_BEARER_TOKEN: ${{ secrets.VITE_TMDB_BEARER_TOKEN }}
+          VITE_OMDB_API_KEY: ${{ secrets.VITE_OMDB_API_KEY }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Sign in to AWS
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Read stack outputs
+        id: stack
+        run: |
+          stack="nexora-$ENV_NAME"
+          if ! outputs=$(aws cloudformation describe-stacks --stack-name "$stack" \
+              --query 'Stacks[0].Outputs' --output json 2> stack-error.txt); then
+            if grep -q 'does not exist' stack-error.txt; then
+              echo "::warning::Stack $stack does not exist yet. Only the backend image is pushed, so the stack can be created."
+              echo "exists=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            cat stack-error.txt
+            exit 1
+          fi
+
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+          for key in AppUrl DistributionId FrontendBucketName EcsClusterName EcsServiceName TaskDefinitionFamily; do
+            value=$(jq -r --arg key "$key" '.[]? | select(.OutputKey == $key) | .OutputValue' <<< "$outputs")
+            if [ -z "$value" ]; then
+              echo "::error::Output $key is missing on stack $stack. Wait until the stack shows CREATE_COMPLETE or UPDATE_COMPLETE."
+              exit 1
+            fi
+            echo "$key=$value" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Build and push backend image
+        id: image
+        run: |
+          registry="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "$registry"
+          repository="$registry/$ECR_REPOSITORY"
+          image="$repository:sha-$GITHUB_SHA"
+          docker build --pull -t "$image" backend
+          docker push "$image"
+          echo "repository=$repository" >> "$GITHUB_OUTPUT"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Tag image for the new stack
+        if: steps.stack.outputs.exists == 'false'
+        env:
+          REPOSITORY: ${{ steps.image.outputs.repository }}
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          docker tag "$IMAGE" "$REPOSITORY:$ENV_NAME"
+          docker push "$REPOSITORY:$ENV_NAME"
+
+      - name: Deploy backend to ECS
+        if: steps.stack.outputs.exists == 'true'
+        env:
+          CLUSTER: ${{ steps.stack.outputs.EcsClusterName }}
+          SERVICE: ${{ steps.stack.outputs.EcsServiceName }}
+          FAMILY: ${{ steps.stack.outputs.TaskDefinitionFamily }}
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          # New task definition revision = current one with only the image changed
+          aws ecs describe-task-definition --task-definition "$FAMILY" --query taskDefinition --output json \
+            | jq --arg image "$IMAGE" '
+                .containerDefinitions[0].image = $image
+                | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities,
+                      .registeredAt, .registeredBy, .deregisteredAt)' \
+            > task-definition.json
+          task_definition=$(aws ecs register-task-definition --cli-input-json file://task-definition.json \
+            --query taskDefinition.taskDefinitionArn --output text)
+          aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --task-definition "$task_definition" > /dev/null
+          echo "Rolling out $task_definition"
+
+          # ECS starts the new version next to the old one. If it fails its health checks,
+          # ECS rolls back automatically and this step fails.
+          for attempt in $(seq 1 80); do
+            read -r current state < <(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" \
+              --query 'services[0].deployments[?status==`PRIMARY`] | [0].[taskDefinition, rolloutState]' --output text)
+            if [ "$current" != "$task_definition" ]; then
+              echo "::error::The new backend failed its health checks and ECS rolled back to the previous version. See the logs in CloudWatch."
+              exit 1
+            fi
+            case "$state" in
+              COMPLETED) echo "Backend is live."; exit 0 ;;
+              FAILED) echo "::error::Backend deployment failed. See the logs in CloudWatch."; exit 1 ;;
+            esac
+            sleep 15
+          done
+          echo "::error::Timed out after 20 minutes waiting for the backend deployment."
+          exit 1
+
+      - name: Mark image as the current ${{ env.ENV_NAME }} version
+        if: steps.stack.outputs.exists == 'true'
+        env:
+          REPOSITORY: ${{ steps.image.outputs.repository }}
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          docker tag "$IMAGE" "$REPOSITORY:$ENV_NAME"
+          docker push "$REPOSITORY:$ENV_NAME"
+
+      - name: Publish frontend
+        if: steps.stack.outputs.exists == 'true'
+        working-directory: frontend
+        env:
+          BUCKET: ${{ steps.stack.outputs.FrontendBucketName }}
+          DISTRIBUTION_ID: ${{ steps.stack.outputs.DistributionId }}
+          APP_URL: ${{ steps.stack.outputs.AppUrl }}
+        run: |
+          # Hashed build files never change, so browsers may cache them for a year
+          aws s3 sync dist/assets "s3://$BUCKET/assets" --cache-control "public,max-age=31536000,immutable"
+          # index.html and other un-hashed files are always re-checked, so users get new releases immediately
+          aws s3 sync dist "s3://$BUCKET" --exclude "assets/*" --cache-control "no-cache" --delete
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*" > /dev/null
+          echo "### Deployed to $ENV_NAME: $APP_URL" >> "$GITHUB_STEP_SUMMARY"

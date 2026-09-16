@@ -10,6 +10,7 @@ import com.nexora.model.PendingUser;
 import com.nexora.repository.UserRepository;
 import com.nexora.repository.PendingUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,10 @@ public class UserService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    // Base URL for links in verification and reset-password emails
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     public PendingUser signup(SignupRequest request) {
         // Validate if email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -67,7 +72,7 @@ public class UserService {
         PendingUser savedPending = pendingUserRepository.save(pendingUser);
 
         // Mock verification email in console (for local debug & sandbox panel fallback)
-        String verificationUrl = "http://localhost:5173/set-password?token=" + token;
+        String verificationUrl = frontendUrl + "/set-password?token=" + token;
         System.out.println("\n--- [MOCK EMAIL SERVICE] ---");
         System.out.println("To: " + pendingUser.getEmail());
         System.out.println("Subject: Verify Your Nexora Account");
@@ -196,7 +201,7 @@ public class UserService {
         user.setResetPasswordToken(token);
         userRepository.save(user);
 
-        String resetUrl = "http://localhost:5173/set-password?token=" + token + "&action=reset";
+        String resetUrl = frontendUrl + "/set-password?token=" + token + "&action=reset";
         System.out.println("\n--- [MOCK EMAIL SERVICE] ---");
         System.out.println("To: " + user.getEmail());
         System.out.println("Subject: Reset Your Nexora Password");

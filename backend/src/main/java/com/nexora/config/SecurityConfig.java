@@ -1,6 +1,7 @@
 package com.nexora.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,9 @@ public class SecurityConfig {
 
     @Autowired
     private JwtFilter jwtFilter;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -46,6 +50,8 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
                 .requestMatchers("/api/v1/uploads/**").permitAll()
+                // Health check used by the AWS load balancer
+                .requestMatchers("/actuator/health").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -57,6 +63,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList(
+            // The deployed app, e.g. the CloudFront URL on AWS
+            frontendUrl,
             "http://localhost:*",
             "http://127.0.0.1:*",
             "http://0.0.0.0:*",
