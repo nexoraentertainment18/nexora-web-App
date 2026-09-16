@@ -38,6 +38,8 @@ Resources:
       RepositoryName: nexora-backend
       # Mutable so the "dev" and "prod" tags can move to each newly deployed image
       ImageTagMutability: MUTABLE
+      # Delete the images with the stack; they are rebuilt from a commit at any time
+      EmptyOnDelete: true
       ImageScanningConfiguration:
         ScanOnPush: true
       LifecyclePolicy:
