@@ -1,0 +1,8 @@
+CREATE DATABASE nexora;
+CREATE USER nexora WITH PASSWORD 'nexora';
+ALTER DATABASE nexora OWNER TO nexora;
+GRANT ALL PRIVILEGES ON DATABASE nexora TO nexora;
+
+\connect nexora
+CREATE SCHEMA IF NOT EXISTS public;
+ALTER SCHEMA public OWNER TO nexora;
