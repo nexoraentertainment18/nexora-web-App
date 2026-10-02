@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+
+FROM node:20-alpine
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm install
+
+COPY . .
+
+ARG VITE_API_TARGET=http://backend:8081
+ENV VITE_API_TARGET=${VITE_API_TARGET}
+
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
