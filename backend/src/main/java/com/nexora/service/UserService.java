@@ -9,6 +9,8 @@ import com.nexora.model.User;
 import com.nexora.model.PendingUser;
 import com.nexora.repository.UserRepository;
 import com.nexora.repository.PendingUserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -71,23 +75,17 @@ public class UserService {
 
         PendingUser savedPending = pendingUserRepository.save(pendingUser);
 
-        // Mock verification email in console (for local debug & sandbox panel fallback)
         String verificationUrl = frontendUrl + "/set-password?token=" + token;
-        System.out.println("\n--- [MOCK EMAIL SERVICE] ---");
-        System.out.println("To: " + pendingUser.getEmail());
-        System.out.println("Subject: Verify Your Nexora Account");
-        System.out.println("Welcome to Nexora! Click the link below to verify your account and set your password:");
-        System.out.println(verificationUrl);
-        System.out.println("----------------------------\n");
 
-        // Send actual verification email
         try {
             String fullName = pendingUser.getFirstName() + " " + pendingUser.getLastName();
             emailService.sendVerificationEmail(pendingUser.getEmail(), fullName, verificationUrl);
-            System.out.println("Real verification email sent successfully to: " + pendingUser.getEmail());
         } catch (Exception e) {
-            System.err.println("Warning: Failed to send real verification email: " + e.getMessage());
-            System.err.println("Please verify SMTP settings in application.properties if you need real emails.");
+            LOGGER.error("Failed to send account verification email.", e);
+            throw new RuntimeException(
+                    "Registration was saved, but the verification email could not be sent. Please try again later.",
+                    e
+            );
         }
 
         return savedPending;
@@ -202,20 +200,12 @@ public class UserService {
         userRepository.save(user);
 
         String resetUrl = frontendUrl + "/set-password?token=" + token + "&action=reset";
-        System.out.println("\n--- [MOCK EMAIL SERVICE] ---");
-        System.out.println("To: " + user.getEmail());
-        System.out.println("Subject: Reset Your Nexora Password");
-        System.out.println("To reset your password, click the link below:");
-        System.out.println(resetUrl);
-        System.out.println("----------------------------\n");
-
         try {
             String fullName = user.getFirstName() + " " + user.getLastName();
             emailService.sendResetPasswordEmail(user.getEmail(), fullName, resetUrl);
-            System.out.println("Real reset password email sent successfully to: " + user.getEmail());
         } catch (Exception e) {
-            System.err.println("Warning: Failed to send real reset email: " + e.getMessage());
-            throw new RuntimeException("Failed to send reset email: " + e.getMessage());
+            LOGGER.error("Failed to send password reset email.", e);
+            throw new RuntimeException("Failed to send reset email. Please try again later.", e);
         }
     }
 

@@ -33,6 +33,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:}")
     private String allowedOrigins;
 
+    @Value("${app.cors.production-origin:}")
+    private String productionOrigin;
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -71,7 +74,10 @@ public class SecurityConfig {
 
         List<String> origins = new ArrayList<>();
         if (frontendUrl != null && !frontendUrl.isBlank()) {
-            origins.add(frontendUrl);
+            origins.add(frontendUrl.trim());
+        }
+        if (productionOrigin != null && !productionOrigin.isBlank()) {
+            origins.add(productionOrigin.trim());
         }
         if (allowedOrigins != null && !allowedOrigins.isBlank()) {
             Arrays.stream(allowedOrigins.split(","))
@@ -80,18 +86,7 @@ public class SecurityConfig {
                 .forEach(origins::add);
         }
 
-        origins.addAll(Arrays.asList(
-            "http://localhost:*",
-            "http://127.0.0.1:*",
-            "http://0.0.0.0:*",
-            "http://192.168.*:*",
-            "http://10.*.*.*:*",
-            "http://172.16-31.*.*:*",
-            "http://*:*",
-            "https://*:*"
-        ));
-
-        configuration.setAllowedOriginPatterns(origins);
+        configuration.setAllowedOrigins(origins.stream().distinct().toList());
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control", "X-Requested-With"));
         configuration.setAllowCredentials(true);
