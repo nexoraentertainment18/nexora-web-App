@@ -195,7 +195,8 @@ Request a certificate in **ACM (region us-east-1)**, add the domain as an altern
 | Environment stack stuck or failed at `Service` | The image `nexora-backend:dev` (or `:prod`) was not in ECR yet — do step 4 first. Otherwise read the container logs in CloudWatch. |
 | `Unable to assume the service linked role` on a brand-new AWS account | AWS creates that role on first use; delete the failed stack and create it again. |
 | Deploy step: *"ECS rolled back to the previous version"* | The new backend didn't become healthy. The reason (database error, missing variable, exception) is in CloudWatch Logs. |
-| Verification emails don't arrive | Check the Gmail app password; the logs show `Failed to send real verification email` with the reason. |
+| `Invalid CORS request` from the API | Set `FRONTEND_URL`, `CORS_PRODUCTION_ORIGIN`, and `CORS_ALLOWED_ORIGINS` to the frontend's exact origin, including scheme and port (for example, `http://16.16.201.70:5173`), then restart/redeploy the backend. This CORS configuration applies to all API routes. |
+| Verification emails don't arrive | Signup returns an error when SMTP delivery fails. Check the backend logs for `Failed to send account verification email` and verify `MAIL_USERNAME` and `MAIL_PASSWORD` use a Gmail app password. |
 | App shows an old version after a deploy | Hard-refresh the browser. The deploy clears CloudFront's cache and `index.html` is never cached, so this is normally immediate. |
 
 ---
