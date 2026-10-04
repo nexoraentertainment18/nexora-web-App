@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,51 +49,85 @@ public class UserService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    public PendingUser signup(SignupRequest request) {
-        // Validate if email already exists
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already in use.");
+    public UserDto signup(SignupRequest request) {
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
+
+        Optional<User> existingUser = userRepository.findByEmailIgnoreCase(email);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            if (user.isVerified()) {
+                throw new RuntimeException("Email already in use.");
+            }
+
+            String token = user.getVerificationToken();
+            if (token == null || token.isBlank()) {
+                token = UUID.randomUUID().toString();
+                user.setVerificationToken(token);
+            }
+            userRepository.save(user);
+            sendVerificationEmail(user.getEmail(), user.getFirstName() + " " + user.getLastName(), token);
+            return new UserDto(user);
         }
 
-        // Delete any existing pending registration for this email to allow re-requesting verification
-        pendingUserRepository.findByEmail(request.getEmail()).ifPresent(p -> pendingUserRepository.delete(p));
+        PendingUser pendingUser = pendingUserRepository.findByEmailIgnoreCase(email)
+                .orElseGet(() -> new PendingUser(
+                        request.getFirstName(),
+                        request.getLastName(),
+                        email,
+                        request.getMobileNumber(),
+                        request.getFavMovieGenre(),
+                        request.getFavPlaceType(),
+                        request.getFavSeriesGenre(),
+                        request.getFavGameType(),
+                        UUID.randomUUID().toString()
+                ));
 
-        // Generate unique token
-        String token = UUID.randomUUID().toString();
-
-        PendingUser pendingUser = new PendingUser(
-                request.getFirstName(),
-                request.getLastName(),
-                request.getEmail(),
-                request.getMobileNumber(),
-                request.getFavMovieGenre(),
-                request.getFavPlaceType(),
-                request.getFavSeriesGenre(),
-                request.getFavGameType(),
-                token
-        );
-
+        pendingUser.setFirstName(request.getFirstName());
+        pendingUser.setLastName(request.getLastName());
+        pendingUser.setEmail(email);
+        pendingUser.setMobileNumber(request.getMobileNumber());
+        pendingUser.setFavMovieGenre(request.getFavMovieGenre());
+        pendingUser.setFavPlaceType(request.getFavPlaceType());
+        pendingUser.setFavSeriesGenre(request.getFavSeriesGenre());
+        pendingUser.setFavGameType(request.getFavGameType());
         PendingUser savedPending = pendingUserRepository.save(pendingUser);
 
-        String verificationUrl = frontendUrl + "/set-password?token=" + token;
+        sendVerificationEmail(
+                savedPending.getEmail(),
+                savedPending.getFirstName() + " " + savedPending.getLastName(),
+                savedPending.getVerificationToken()
+        );
+        return new UserDto(savedPending);
+    }
 
+    private void sendVerificationEmail(String email, String fullName, String token) {
+        String verificationUrl = frontendUrl + "/set-password?token=" + token;
         try {
-            String fullName = pendingUser.getFirstName() + " " + pendingUser.getLastName();
-            emailService.sendVerificationEmail(pendingUser.getEmail(), fullName, verificationUrl);
+            emailService.sendVerificationEmail(email, fullName, verificationUrl);
         } catch (Exception e) {
             LOGGER.error("Failed to send account verification email.", e);
             throw new RuntimeException(
-                    "Registration was saved, but the verification email could not be sent. Please try again later.",
+                    "Your registration is saved, but the verification email could not be sent. Submit this form again with the same email to retry. If this keeps failing, contact support.",
                     e
             );
         }
-
-        return savedPending;
     }
 
     public User verifyAndSetPassword(String token, String password) {
-        PendingUser pendingUser = pendingUserRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid or expired verification token."));
+        Optional<PendingUser> pendingUserResult = pendingUserRepository.findByVerificationToken(token);
+        if (pendingUserResult.isEmpty()) {
+            User existingUser = userRepository.findByVerificationToken(token)
+                    .orElseThrow(() -> new RuntimeException("Invalid or expired verification token."));
+            if (existingUser.isVerified()) {
+                throw new RuntimeException("Invalid or expired verification token.");
+            }
+
+            existingUser.setPasswordHash(passwordEncoder.encode(password));
+            existingUser.setVerified(true);
+            existingUser.setVerificationToken(null);
+            return userRepository.save(existingUser);
+        }
+        PendingUser pendingUser = pendingUserResult.get();
 
         if (userRepository.findByEmail(pendingUser.getEmail()).isPresent()) {
             pendingUserRepository.delete(pendingUser);
@@ -222,7 +256,10 @@ public class UserService {
         if ("reset".equalsIgnoreCase(action)) {
             return userRepository.findByResetPasswordToken(token).isPresent();
         } else {
-            return pendingUserRepository.findByVerificationToken(token).isPresent();
+            return pendingUserRepository.findByVerificationToken(token).isPresent()
+                    || userRepository.findByVerificationToken(token)
+                            .filter(user -> !user.isVerified())
+                            .isPresent();
         }
     }
 }
