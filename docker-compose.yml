@@ -30,7 +30,7 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://0.0.0.0:5173,http://16.16.201.70:5173}
       JWT_SECRET: 9a6230f6534571ef99c92284910cfb19d45e4544d67390cf2c40c83a0058bbf43dcf49b38466b0d91244d28d08c5c7d0d0c3eb1492b45cf5dc128b9d3b4502d68e2197f26d36
       MAIL_USERNAME: nexora.entertainment18@gmail.com
-      MAIL_PASSWORD: fjsbrzbwzjksmrob
+      MAIL_PASSWORD: jjvluwlcokqeahjm
       S3_BUCKET: ${S3_BUCKET:-}
       AWS_REGION: ${AWS_REGION:-eu-north-1}
     volumes:
