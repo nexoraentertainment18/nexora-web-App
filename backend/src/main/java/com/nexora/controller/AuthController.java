@@ -2,7 +2,6 @@ package com.nexora.controller;
 
 import com.nexora.dto.*;
 import com.nexora.model.User;
-import com.nexora.model.PendingUser;
 import com.nexora.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -22,8 +21,8 @@ public class AuthController {
     @PostMapping("/api/v1/auth/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
         try {
-            PendingUser pendingUser = userService.signup(request);
-            return ResponseEntity.ok(new UserDto(pendingUser));
+            UserDto user = userService.signup(request);
+            return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

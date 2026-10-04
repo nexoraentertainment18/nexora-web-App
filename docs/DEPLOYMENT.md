@@ -196,7 +196,7 @@ Request a certificate in **ACM (region us-east-1)**, add the domain as an altern
 | `Unable to assume the service linked role` on a brand-new AWS account | AWS creates that role on first use; delete the failed stack and create it again. |
 | Deploy step: *"ECS rolled back to the previous version"* | The new backend didn't become healthy. The reason (database error, missing variable, exception) is in CloudWatch Logs. |
 | `Invalid CORS request` from the API | Set `FRONTEND_URL`, `CORS_PRODUCTION_ORIGIN`, and `CORS_ALLOWED_ORIGINS` to the frontend's exact origin, including scheme and port (for example, `http://16.16.201.70:5173`), then restart/redeploy the backend. This CORS configuration applies to all API routes. |
-| Verification emails don't arrive | Signup returns an error when SMTP delivery fails. Check the backend logs for `Failed to send account verification email` and verify `MAIL_USERNAME` and `MAIL_PASSWORD` use a Gmail app password. |
+| Verification emails don't arrive | Signup saves the pending account and allows the same address to retry sending. Check the backend logs for `Failed to send account verification email` to see the SMTP cause. On AWS, update the stack's `MailUsername` and `MailPassword` parameters; `MailPassword` must be a valid Gmail app password for that account (not its normal password), then deploy/restart the backend so ECS receives the updated secret. Check Gmail's Sent/blocked-mail activity and Google Account security if SMTP reports authentication errors. |
 | App shows an old version after a deploy | Hard-refresh the browser. The deploy clears CloudFront's cache and `index.html` is never cached, so this is normally immediate. |
 
 ---
