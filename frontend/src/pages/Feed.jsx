@@ -25,6 +25,12 @@ import {
   useDeleteCommentMutation
 } from '../api/queries';
 
+const resolveImageUrl = (img) => {
+  if (!img) return '';
+  if (img.startsWith('http://') || img.startsWith('https://')) return img;
+  return `/api/v1/uploads/${img}`;
+};
+
 const Feed = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -432,7 +438,7 @@ const Feed = () => {
                     {post.imageUrl && !editDeleteImage && !editImagePreview && (
                       <div className="relative rounded-xl overflow-hidden max-h-40 border border-slate-800 bg-slate-950/30 flex items-center justify-center p-1">
                         <img 
-                          src={`/api/v1/uploads/${post.imageUrl}`} 
+                          src={resolveImageUrl(post.imageUrl)} 
                           alt="Current Post" 
                           className="max-h-36 object-contain rounded" 
                         />
@@ -525,7 +531,7 @@ const Feed = () => {
                 {post.imageUrl && editingPostId !== post.id && (
                   <div className="w-full rounded-2xl overflow-hidden border border-slate-900 bg-slate-950/30 flex items-center justify-center p-1 min-h-[200px] max-h-[480px]">
                     <img 
-                      src={`/api/v1/uploads/${post.imageUrl}`} 
+                      src={resolveImageUrl(post.imageUrl)} 
                       alt="Moment Photo" 
                       className="max-w-full max-h-[450px] object-contain w-auto h-auto transition-transform duration-500 hover:scale-[1.01]" 
                       onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600"; }}

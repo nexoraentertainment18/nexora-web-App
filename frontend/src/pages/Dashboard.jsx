@@ -26,6 +26,12 @@ import {
 } from "../api/queries";
 import { useToast } from "../context/ToastContext";
 
+const resolveImageUrl = (img) => {
+  if (!img) return "";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  return `/api/v1/uploads/${img}`;
+};
+
 // Import local image assets for background switcher
 import cyberCityImg from "../assets/cyber_future_city.png";
 import skyRealmImg from "../assets/sky_realm.png";
@@ -571,7 +577,7 @@ const Dashboard = () => {
                 >
                   {user?.profilePicture ? (
                     <img
-                      src={`/api/v1/uploads/${user.profilePicture}`}
+                      src={resolveImageUrl(user.profilePicture)}
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />

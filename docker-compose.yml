@@ -33,6 +33,9 @@ services:
       MAIL_PASSWORD: fjsbrzbwzjksmrob
       S3_BUCKET: ${S3_BUCKET:-}
       AWS_REGION: ${AWS_REGION:-eu-north-1}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-Nexora}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-797675238841127}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-GdtF0g-sFne4MuhSffXtp4coNHo}
     volumes:
       - ./backend/uploads:/app/uploads
 
@@ -41,6 +44,8 @@ services:
       context: ./frontend
       args:
         VITE_API_TARGET: http://backend:8081
+        VITE_TMDB_BEARER_TOKEN: ${VITE_TMDB_BEARER_TOKEN:-eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMDcyYzA3YWZhMDBjMWU2NjMyMGQ3MThjYWNlYTRiZCIsIm5iZiI6MTc4MjY2MDI0MC42OTcsInN1YiI6IjZhNDEzYzkwYmNkZTgzNmFkMTQ1ZjBlNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.AOABVmAFn-XWGu4cvb-MbfqkW2XnQRl60WsuT1nHZLw}
+        VITE_OMDB_API_KEY: ${VITE_OMDB_API_KEY:-a6e32f97}
     restart: unless-stopped
     depends_on:
       - backend
@@ -48,6 +53,8 @@ services:
       - "5173:5173"
     environment:
       VITE_API_TARGET: http://backend:8081
+      VITE_TMDB_BEARER_TOKEN: ${VITE_TMDB_BEARER_TOKEN:-eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMDcyYzA3YWZhMDBjMWU2NjMyMGQ3MThjYWNlYTRiZCIsIm5iZiI6MTc4MjY2MDI0MC42OTcsInN1YiI6IjZhNDEzYzkwYmNkZTgzNmFkMTQ1ZjBlNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.AOABVmAFn-XWGu4cvb-MbfqkW2XnQRl60WsuT1nHZLw}
+      VITE_OMDB_API_KEY: ${VITE_OMDB_API_KEY:-a6e32f97}
     volumes:
       - ./frontend:/app
       - /app/node_modules

@@ -271,7 +271,7 @@ const Profile = () => {
         <div className="h-24 w-24 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 p-0.5 shadow-xl flex-shrink-0 relative group">
           <div className="w-full h-full bg-slate-950 rounded-full flex items-center justify-center text-3xl font-bold text-slate-100 overflow-hidden relative">
             {profileUser.profilePicture ? (
-              <img src={`/api/v1/uploads/${profileUser.profilePicture}`} alt="Profile" className="w-full h-full object-cover" />
+              <img src={resolveImageUrl(profileUser.profilePicture)} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               profileUser.firstName?.charAt(0)
             )}
@@ -465,7 +465,7 @@ const Profile = () => {
                       {post.imageUrl && !editDeleteImage && !editImagePreview && (
                         <div className="relative rounded-xl overflow-hidden max-h-40 border border-slate-800 bg-slate-950/30 flex items-center justify-center p-1">
                           <img 
-                            src={`/api/v1/uploads/${post.imageUrl}`} 
+                            src={resolveImageUrl(post.imageUrl)} 
                             alt="Current Post" 
                             className="max-h-36 object-contain rounded" 
                           />
@@ -555,7 +555,7 @@ const Profile = () => {
                   {post.imageUrl && editingPostId !== post.id && (
                     <div className="w-full rounded-2xl overflow-hidden border border-slate-900 bg-slate-950/30 flex items-center justify-center p-1 min-h-[200px] max-h-[480px]">
                       <img 
-                        src={`/api/v1/uploads/${post.imageUrl}`} 
+                        src={resolveImageUrl(post.imageUrl)} 
                         alt="Moment Photo" 
                         className="max-w-full max-h-[450px] object-contain w-auto h-auto transition-transform duration-500 hover:scale-[1.01]" 
                         onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600"; }}
