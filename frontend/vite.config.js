@@ -15,6 +15,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     cors: true,
+    hmr: {
+      clientPort: 5173,
+    },
     proxy: {
       '/api/v1': {
         target: apiTarget,

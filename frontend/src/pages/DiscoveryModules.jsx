@@ -600,7 +600,7 @@ const DiscoveryModules = () => {
 
     if (activeModule === "movies") {
       Object.keys(movieForm).forEach((k) => {
-        if (movieForm[k] !== undefined && movieForm[k] !== null) {
+        if (movieForm[k] !== undefined && movieForm[k] !== null && movieForm[k] !== "") {
           formData.append(k, movieForm[k]);
         }
       });
@@ -608,7 +608,7 @@ const DiscoveryModules = () => {
       if (externalImageUrl) formData.append("posterUrl", externalImageUrl);
     } else if (activeModule === "webseries") {
       Object.keys(seriesForm).forEach((k) => {
-        if (seriesForm[k] !== undefined && seriesForm[k] !== null) {
+        if (seriesForm[k] !== undefined && seriesForm[k] !== null && seriesForm[k] !== "") {
           formData.append(k, seriesForm[k]);
         }
       });
@@ -616,7 +616,7 @@ const DiscoveryModules = () => {
       if (externalImageUrl) formData.append("posterUrl", externalImageUrl);
     } else if (activeModule === "games") {
       Object.keys(gameForm).forEach((k) => {
-        if (gameForm[k] !== undefined && gameForm[k] !== null) {
+        if (gameForm[k] !== undefined && gameForm[k] !== null && gameForm[k] !== "") {
           formData.append(k, gameForm[k]);
         }
       });
@@ -624,14 +624,14 @@ const DiscoveryModules = () => {
       if (externalImageUrl) formData.append("coverUrl", externalImageUrl);
     } else if (activeModule === "places") {
       Object.keys(placeForm).forEach((k) => {
-        if (placeForm[k] !== undefined && placeForm[k] !== null) {
+        if (placeForm[k] !== undefined && placeForm[k] !== null && placeForm[k] !== "") {
           formData.append(k, placeForm[k]);
         }
       });
       formFiles.forEach((file) => formData.append("photo", file));
     } else if (activeModule === "restaurants") {
       Object.keys(restaurantForm).forEach((k) => {
-        if (restaurantForm[k] !== undefined && restaurantForm[k] !== null) {
+        if (restaurantForm[k] !== undefined && restaurantForm[k] !== null && restaurantForm[k] !== "") {
           formData.append(k, restaurantForm[k]);
         }
       });
