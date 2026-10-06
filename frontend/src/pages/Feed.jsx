@@ -534,7 +534,7 @@ const Feed = () => {
                       src={resolveImageUrl(post.imageUrl)} 
                       alt="Moment Photo" 
                       className="max-w-full max-h-[450px] object-contain w-auto h-auto transition-transform duration-500 hover:scale-[1.01]" 
-                      onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600"; }}
+                      onError={(e) => { e.target.src = "https://picsum.photos/seed/fallback/600/600"; }}
                     />
                   </div>
                 )}

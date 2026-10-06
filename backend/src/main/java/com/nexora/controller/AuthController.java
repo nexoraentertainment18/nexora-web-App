@@ -98,12 +98,21 @@ public class AuthController {
 
     @PostMapping("/api/v1/auth/profile/picture")
     public ResponseEntity<?> updateProfilePicture(HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+        System.out.println("[ProfilePicture] Received upload request.");
+        System.out.println("[ProfilePicture] File Name: " + file.getOriginalFilename() + ", Size: " + file.getSize() + ", ContentType: " + file.getContentType());
         Long userId = (Long) request.getAttribute("userId");
-        if (userId == null) return ResponseEntity.status(401).body("Not authenticated.");
+        if (userId == null) {
+            System.out.println("[ProfilePicture] Error: Not authenticated.");
+            return ResponseEntity.status(401).body("Not authenticated.");
+        }
         try {
+            System.out.println("[ProfilePicture] Calling userService for userId: " + userId);
             User user = userService.updateProfilePicture(userId, file);
+            System.out.println("[ProfilePicture] Success for userId: " + userId);
             return ResponseEntity.ok(new UserDto(user));
         } catch (Exception e) {
+            System.out.println("[ProfilePicture] Error during upload: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

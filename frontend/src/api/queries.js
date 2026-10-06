@@ -283,14 +283,21 @@ export const useUpdateProfilePictureMutation = () => {
   const { updateUser } = useAuth();
   return useMutation({
     mutationFn: async (file) => {
+      console.log('Initiating profile picture upload. File:', file);
       const formData = new FormData();
       formData.append('file', file);
-      const res = await axios.post('/api/v1/auth/profile/picture', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return res.data;
+      try {
+        const res = await axios.post('/api/v1/auth/profile/picture', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        console.log('Upload successful:', res.data);
+        return res.data;
+      } catch (error) {
+        console.error('Upload failed:', error.response?.data || error.message, error);
+        throw error;
+      }
     },
     onSuccess: (updatedUser) => {
       updateUser(updatedUser);

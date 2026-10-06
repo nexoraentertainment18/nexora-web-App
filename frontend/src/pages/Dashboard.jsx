@@ -41,25 +41,25 @@ const BACKDROP_POOL = [
   cyberCityImg,
   skyRealmImg,
   // Marvel / Superhero themed backgrounds
-  "https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=1200", // Spider-Man Suit Vibe
-  "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=1200", // Superhero Comics Art
-  "https://images.unsplash.com/photo-1608889175123-8ec330b86f84?q=80&w=1200", // Iron Man Neon Mask Vibe
-  "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=1200", // Neon Marvel Concept Art
+  "https://picsum.photos/seed/marvel1/1200/800", // Spider-Man Suit Vibe
+  "https://picsum.photos/seed/marvel2/1200/800", // Superhero Comics Art
+  "https://picsum.photos/seed/ironman/1200/800", // Iron Man Neon Mask Vibe
+  "https://picsum.photos/seed/neonmarvel/1200/800", // Neon Marvel Concept Art
   // Travel / Places themed backgrounds
-  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200", // Scenic Canyon Travel Route
-  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=1200", // Scenic Mountain Travel Lake
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200", // Tropical Beach Travel Location
-  "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1200", // Scenic Travel Lake & Sunset
+  "https://picsum.photos/seed/canyon/1200/800", // Scenic Canyon Travel Route
+  "https://picsum.photos/seed/mountain/1200/800", // Scenic Mountain Travel Lake
+  "https://picsum.photos/seed/beach/1200/800", // Tropical Beach Travel Location
+  "https://picsum.photos/seed/lake/1200/800", // Scenic Travel Lake & Sunset
   // Movies & Web Series themed backgrounds
-  "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1200", // Cinema Seats / Theater Hall
-  "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=1200", // Classic Movie Theater Neon Front
-  "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1200", // Movie Roll & Production
-  "https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=1200", // Film Camera Lens / Cinema Projector
+  "https://picsum.photos/seed/cinema1/1200/800", // Cinema Seats / Theater Hall
+  "https://picsum.photos/seed/cinema2/1200/800", // Classic Movie Theater Neon Front
+  "https://picsum.photos/seed/cinema3/1200/800", // Movie Roll & Production
+  "https://picsum.photos/seed/cinema4/1200/800", // Film Camera Lens / Cinema Projector
   // Restaurants / Cuisine themed backgrounds
-  "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200", // Cozy Elegant Restaurant Interior
-  "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200", // Premium Plated Gourmet Dining
-  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1200", // Restaurant Kitchen / Food Curation
-  "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200", // Premium Steakhouse Dining Table Vibe
+  "https://picsum.photos/seed/food1/1200/800", // Cozy Elegant Restaurant Interior
+  "https://picsum.photos/seed/food2/1200/800", // Premium Plated Gourmet Dining
+  "https://picsum.photos/seed/food3/1200/800", // Restaurant Kitchen / Food Curation
+  "https://picsum.photos/seed/food4/1200/800", // Premium Steakhouse Dining Table Vibe
 ];
 
 const LogoutHelper = () => {
