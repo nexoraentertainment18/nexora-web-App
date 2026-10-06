@@ -20,11 +20,7 @@ export const useCreatePostMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (formData) => {
-      const res = await axios.post('/api/v1/posts', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const res = await axios.post('/api/v1/posts', formData);
       return res.data;
     },
     onSuccess: (newPost) => {
@@ -125,11 +121,7 @@ export const useUpdatePostMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ postId, formData }) => {
-      const res = await axios.put(`/api/v1/posts/${postId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const res = await axios.put(`/api/v1/posts/${postId}`, formData);
       return res.data;
     },
     onSuccess: (updatedPost) => {
@@ -161,11 +153,7 @@ export const useCreateListingMutation = (module) => {
   return useMutation({
     mutationFn: async (formData) => {
       let endpoint = `/api/v1/${module}`;
-      const res = await axios.post(endpoint, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const res = await axios.post(endpoint, formData);
       return res.data;
     },
     onSuccess: () => {
@@ -287,11 +275,7 @@ export const useUpdateProfilePictureMutation = () => {
       const formData = new FormData();
       formData.append('file', file);
       try {
-        const res = await axios.post('/api/v1/auth/profile/picture', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+        const res = await axios.post('/api/v1/auth/profile/picture', formData);
         console.log('Upload successful:', res.data);
         return res.data;
       } catch (error) {

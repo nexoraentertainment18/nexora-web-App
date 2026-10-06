@@ -37,18 +37,17 @@ public class FileStorageService {
 
     @PostConstruct
     public void init() {
-        if (useCloudinary()) {
-            LOGGER.info("Cloudinary storage is configured (cloud_name={}). Files will be uploaded to Cloudinary.", cloudName);
-            return;
-        }
-
-        // Fallback to local disk storage
-        LOGGER.info("Cloudinary is not configured. Falling back to local disk storage at: {}", uploadDir);
         try {
             this.rootLocation = Paths.get(uploadDir);
             Files.createDirectories(this.rootLocation);
         } catch (IOException e) {
             throw new RuntimeException("Could not initialize storage directory: " + uploadDir, e);
+        }
+
+        if (useCloudinary()) {
+            LOGGER.info("Cloudinary storage is configured (cloud_name={}). Files will be uploaded to Cloudinary, with fallback to local disk.", cloudName);
+        } else {
+            LOGGER.info("Cloudinary is not configured. Using local disk storage at: {}", uploadDir);
         }
     }
 
@@ -57,12 +56,19 @@ public class FileStorageService {
      */
     public String storeFile(MultipartFile file) {
         if (file.isEmpty()) {
+            LOGGER.error("Failed to store empty file.");
             throw new RuntimeException("Failed to store empty file.");
         }
+        LOGGER.info("Initiating file storage for: {}, size: {} bytes", file.getOriginalFilename(), file.getSize());
 
         try {
             if (useCloudinary()) {
-                return storeInCloudinary(file);
+                try {
+                    return storeInCloudinary(file);
+                } catch (Exception e) {
+                    LOGGER.warn("Cloudinary upload failed, falling back to local storage.", e);
+                    return storeOnDisk(file);
+                }
             } else {
                 return storeOnDisk(file);
             }
@@ -92,6 +98,7 @@ public class FileStorageService {
     }
 
     private String storeInCloudinary(MultipartFile file) throws IOException {
+        LOGGER.info("Attempting Cloudinary upload for: {}", file.getOriginalFilename());
         @SuppressWarnings("unchecked")
         Map<String, Object> uploadResult = cloudinary.uploader().upload(
                 file.getBytes(),
@@ -126,13 +133,16 @@ public class FileStorageService {
 
         if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath().normalize())) {
             // This is a security check against directory traversal
+            LOGGER.error("Security violation: Attempted to store file outside current directory.");
             throw new RuntimeException("Cannot store file outside current directory.");
         }
 
+        LOGGER.info("Saving file to local path: {}", destinationFile.toString());
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
         }
-
+        
+        LOGGER.info("Successfully saved file locally with generated name: {}", newFileName);
         return newFileName;
     }
 

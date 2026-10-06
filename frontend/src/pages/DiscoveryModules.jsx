@@ -999,7 +999,7 @@ const DiscoveryModules = () => {
                       className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                       onError={(e) => {
                         e.target.src =
-                          "https://picsum.photos/seed/fallback/600/600";
+                          "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600";
                       }}
                     />
                   ) : (
@@ -2007,7 +2007,7 @@ const DiscoveryModules = () => {
                     style={{ minHeight: "300px" }}
                     onError={(e) => {
                       e.target.src =
-                        "https://picsum.photos/seed/fallback/600/600";
+                        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600";
                     }}
                   />
                   {/* Gradient overlays */}
