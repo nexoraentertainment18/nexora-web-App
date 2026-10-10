@@ -31,7 +31,7 @@ public class Restaurant {
     @Column(name = "price_range", nullable = false)
     private String priceRange;
 
-    @Column(name = "menu_image_url")
+    @Column(name = "menu_image_url", columnDefinition = "TEXT")
     private String menuImageUrl;
 
     @ElementCollection(fetch = FetchType.EAGER)

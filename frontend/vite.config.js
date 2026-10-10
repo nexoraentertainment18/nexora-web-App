@@ -28,7 +28,7 @@ export default defineConfig({
             console.error('[Vite Proxy] Error connecting to backend:', err.message);
             if (res && !res.headersSent) {
               res.writeHead(503, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify('Backend server is not reachable. Please ensure it is running on port 8080.'));
+              res.end(JSON.stringify('Backend server is not reachable. Please ensure it is running on port 8081.'));
             }
           });
         },

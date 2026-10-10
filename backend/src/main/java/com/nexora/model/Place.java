@@ -34,7 +34,7 @@ public class Place {
     @Column(columnDefinition = "TEXT")
     private String details;
 
-    @Column(name = "photo_url")
+    @Column(name = "photo_url", columnDefinition = "TEXT")
     private String photoUrl;
 
     @ElementCollection(fetch = FetchType.EAGER)

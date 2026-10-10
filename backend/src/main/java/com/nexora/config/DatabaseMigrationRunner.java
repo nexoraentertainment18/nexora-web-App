@@ -27,6 +27,8 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
             System.err.println("[DB Migration Warning] Could not create public schema: " + e.getMessage());
         }
 
+        widenImageUrlColumns();
+
         // ── Make movies.hero and movies.heroine nullable (safe to run repeatedly)
         try {
             jdbcTemplate.execute("ALTER TABLE movies ALTER COLUMN hero DROP NOT NULL");
@@ -102,5 +104,22 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         } catch (Exception e) {
             System.err.println("[Database Migration Warning] Failed to migrate comments: " + e.getMessage());
         }
+    }
+
+    private void widenImageUrlColumns() {
+        String[] statements = {
+            "ALTER TABLE users ALTER COLUMN profile_picture TYPE TEXT",
+            "ALTER TABLE posts ALTER COLUMN image_url TYPE TEXT",
+            "ALTER TABLE movies ALTER COLUMN poster_url TYPE TEXT",
+            "ALTER TABLE web_series ALTER COLUMN poster_url TYPE TEXT",
+            "ALTER TABLE games ALTER COLUMN cover_url TYPE TEXT",
+            "ALTER TABLE places ALTER COLUMN photo_url TYPE TEXT",
+            "ALTER TABLE restaurants ALTER COLUMN menu_image_url TYPE TEXT"
+        };
+
+        for (String statement : statements) {
+            jdbcTemplate.execute(statement);
+        }
+        System.out.println("[DB Migration] Image URL columns support Cloudinary URLs.");
     }
 }

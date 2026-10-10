@@ -1995,16 +1995,15 @@ const DiscoveryModules = () => {
           className="!p-0 overflow-hidden"
         >
           {/* ── Cinematic Two-Panel Layout ── */}
-          <div className="flex flex-col md:flex-row min-h-[560px] max-h-[88vh]">
+          <div className="flex flex-col md:flex-row h-[85vh] md:h-auto md:min-h-[560px] md:max-h-[88vh] w-full">
             {/* LEFT PANEL — Poster */}
-            <div className="relative md:w-[300px] flex-shrink-0 bg-slate-950 overflow-hidden">
+            <div className="relative md:w-[300px] flex-shrink-0 bg-slate-950 overflow-hidden h-[35vh] md:h-auto">
               {getItemImgProperty(selectedItem).length > 0 ? (
                 <>
                   <img
                     src={resolveImageUrl(getItemImgProperty(selectedItem)[0])}
                     alt={selectedItem.name}
                     className="w-full h-full object-cover"
-                    style={{ minHeight: "300px" }}
                     onError={(e) => {
                       e.target.src =
                         "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600";
@@ -2015,11 +2014,8 @@ const DiscoveryModules = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent to-slate-900/30 md:to-slate-900/80" />
                 </>
               ) : (
-                <div
-                  className="w-full h-full flex flex-col items-center justify-center text-slate-700 bg-slate-950"
-                  style={{ minHeight: "300px" }}
-                >
-                  <Sparkles className="h-16 w-16 text-slate-800 mb-3" />
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-700 bg-slate-950">
+                  <Sparkles className="h-12 w-12 md:h-16 md:w-16 text-slate-800 mb-3" />
                   <span className="text-[11px] uppercase font-bold tracking-wider text-slate-600">
                     No Poster
                   </span>
@@ -2034,7 +2030,7 @@ const DiscoveryModules = () => {
                     ? "Web Series"
                     : activeModule.slice(0, -1)}
                 </span>
-                <h2 className="text-xl font-extrabold text-white leading-tight drop-shadow-lg">
+                <h2 className="text-xl md:text-2xl font-extrabold text-white leading-tight drop-shadow-lg line-clamp-2">
                   {selectedItem.name}
                 </h2>
                 <div
@@ -2044,7 +2040,7 @@ const DiscoveryModules = () => {
                       navigate(`/profile/${selectedItem.uploadedBy.id}`);
                     }
                   }}
-                  className="text-[11px] text-purple-300 hover:text-purple-200 hover:underline cursor-pointer mt-0.5 transition"
+                  className="text-[11px] text-purple-300 hover:text-purple-200 hover:underline cursor-pointer mt-1 transition truncate"
                 >
                   Recommended by {selectedItem.uploadedBy?.firstName || "User"}{" "}
                   {selectedItem.uploadedBy?.lastName || ""}
@@ -2053,9 +2049,9 @@ const DiscoveryModules = () => {
             </div>
 
             {/* RIGHT PANEL — Details + Comments */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-slate-900">
               {/* Scrollable details area */}
-              <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-5">
+              <div className="flex-1 overflow-y-auto no-scrollbar p-5 md:p-6 space-y-5">
                 {/* ── Hero Stats Row (Rating + Release + Platform) ── */}
                 {(selectedItem.rating ||
                   selectedItem.releaseDate ||

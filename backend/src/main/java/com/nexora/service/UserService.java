@@ -221,7 +221,7 @@ public class UserService {
             user.setProfilePicture(filename);
             return userRepository.save(user);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to store profile picture.", e);
+            throw new RuntimeException("Failed to store profile picture: " + e.getMessage(), e);
         }
     }
 

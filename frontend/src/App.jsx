@@ -14,6 +14,7 @@ import DiscoveryModules from './pages/DiscoveryModules';
 import Profile from './pages/Profile';
 import NexusPortal from './pages/NexusPortal';
 import AdminPanel from './pages/AdminPanel';
+import HelpWidget from './components/HelpWidget';
 
 function App() {
   return (
@@ -29,23 +30,23 @@ function App() {
               <Route path="/set-password" element={<Auth />} />
 
               {/* Secure Friend-Gated & Public Directory Modules */}
-              <Route path="/" element={
+              <Route element={
                 <PrivateRoute>
                   <Dashboard />
                 </PrivateRoute>
               }>
-                <Route index element={<Navigate to="/feed" replace />} />
-                <Route path="feed" element={<Feed />} />
-                <Route path="discover" element={<DiscoveryModules />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="profile/:id" element={<Profile />} />
-                <Route path="admin" element={<AdminPanel />} />
-                {/* <Route path="nexus" element={<NexusPortal />} /> */}
+                <Route path="/feed" element={<Feed />} />
+                <Route path="/discover" element={<DiscoveryModules />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                {/* <Route path="/nexus" element={<NexusPortal />} /> */}
               </Route>
 
               {/* Fallback Redirection */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            <HelpWidget />
           </BrowserRouter>
         </ToastProvider>
       </AuthProvider>

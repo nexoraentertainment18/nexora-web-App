@@ -32,8 +32,8 @@ export const AuthProvider = ({ children }) => {
     const responseInterceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
-        const isAuthEndpoint = error.config?.url?.includes('/api/v1/auth/');
-        if (error.response && (error.response.status === 401 || error.response.status === 403) && !isAuthEndpoint) {
+        const isPublicAuthEndpoint = error.config?.url?.match(/\/api\/v1\/auth\/(login|signup|verify|forgot-password|reset-password)/);
+        if (error.response && (error.response.status === 401 || error.response.status === 403) && !isPublicAuthEndpoint) {
           console.warn("Session expired or unauthorized. Logging out...");
           logout();
           window.location.href = '/login?tab=signin&expired=true';

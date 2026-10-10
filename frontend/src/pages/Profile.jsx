@@ -163,8 +163,14 @@ const Profile = () => {
         onSuccess: () => {
           showToast('Profile picture updated successfully!', 'success');
         },
-        onError: () => {
-          showToast('Failed to update profile picture.', 'error');
+        onError: (error) => {
+          const message = error.response?.data;
+          showToast(
+            typeof message === 'string' && message.trim()
+              ? message
+              : 'Failed to update profile picture.',
+            'error'
+          );
         }
       });
     }

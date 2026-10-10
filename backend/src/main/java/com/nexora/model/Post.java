@@ -19,7 +19,7 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(columnDefinition = "TEXT")

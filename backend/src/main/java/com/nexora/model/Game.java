@@ -28,7 +28,7 @@ public class Game {
     @Column(nullable = false)
     private String platform;
 
-    @Column(name = "cover_url")
+    @Column(name = "cover_url", columnDefinition = "TEXT")
     private String coverUrl;
 
     @ElementCollection(fetch = FetchType.EAGER)

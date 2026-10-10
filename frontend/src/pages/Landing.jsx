@@ -1,103 +1,198 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Users, Search, Film, Tv, Gamepad2, MapPin, Utensils } from 'lucide-react';
-import BubbleBackground from '../components/BubbleBackground';
-import { HomeSpider } from '../components/SpiderMascot';
+import { Search } from 'lucide-react';
+
+/**
+ * IMAGE SETUP
+ * Copy the provided "images/landing" folder into your project's  public/  folder
+ * so the files end up at  public/images/landing/*.png|jpg
+ */
+const IMG = '/images/landing/';
+
+/**
+ * Gallery layout. Every value is a % of the gallery box (aspect 1024:560),
+ * so the composition scales exactly like the mockup on any screen width.
+ * x/y = left/top, w = width, r = rotation (deg), z = stacking order.
+ * `card` = poster card with rounded corners + shadow; otherwise a floating object.
+ */
+const GALLERY = [
+  // ---- Poster cards ----
+  { src: 'dune.jpg',          alt: 'Dune',          x: 8.5,  y: 20, w: 18.5, r: -8, z: 20, card: true, h: 41 },
+  { src: 'spiderman.jpg',     alt: 'Spider-Man',    x: 27,   y: 30, w: 15,   r: -5, z: 25, card: true, h: 36 },
+  { src: 'oppenheimer.jpg',   alt: 'Oppenheimer',   x: 41.5, y: 25, w: 18.5, r: 2,  z: 30, card: true, h: 43 },
+  { src: 'godofwar.jpg',      alt: 'God of War',    x: 59.5, y: 30, w: 17,   r: 4,  z: 25, card: true, h: 36, glass: true },
+  { src: 'zelda.jpg',         alt: 'Zelda',         x: 77,   y: 36, w: 15,   r: 8,  z: 20, card: true, h: 28 },
+
+  // ---- Floating objects (transparent PNGs) ----
+  { src: 'cola.png',          alt: 'Cola',          x: 5,    y: 3,  w: 6,    r: 0,   z: 15 },
+  { src: 'sushi-nigiri.png',  alt: 'Sushi',         x: 0,    y: 23, w: 6.5,  r: 0,   z: 15 },
+  { src: 'planet-ring.png',   alt: 'Planet',        x: 25.5, y: 21, w: 8,    r: 0,   z: 12, float: true },
+  { src: 'popcorn2.png',      alt: 'Popcorn',       x: 38,   y: 14, w: 8,    r: 0,   z: 35 },
+  { src: 'sushi-roll.png',    alt: 'Sushi roll',    x: 53,   y: 16, w: 8.5,  r: 0,   z: 15 },
+  { src: 'switch.png',        alt: 'Nintendo Switch', x: 73, y: 15, w: 22,   r: 0,   z: 35 },
+  { src: 'taco.png',          alt: 'Taco',          x: 87.5, y: 0,  w: 6.5,  r: 0,   z: 15 },
+  { src: 'planet-ring2.png',  alt: 'Planet',        x: 93,   y: 41, w: 7,    r: 0,   z: 12, float: true },
+  { src: 'aloy.png',          alt: 'Horizon hero',  x: 0,    y: 49, w: 13.5, r: 0,   z: 40 },
+  { src: 'ps5-controller.png',alt: 'Controller',    x: 14.5, y: 62, w: 15.5, r: 0,   z: 40 },
+  { src: 'cola2.png',         alt: 'Cola',          x: 36,   y: 65, w: 8,    r: 0,   z: 40 },
+  { src: 'taco2.png',         alt: 'Taco',          x: 52.5, y: 69, w: 10.5, r: 0,   z: 40 },
+  { src: 'cola3.png',         alt: 'Cola',          x: 66.5, y: 66, w: 6.5,  r: 0,   z: 40 },
+  { src: 'planet.png',        alt: 'Planet',        x: 77.5, y: 70, w: 6.5,  r: 0,   z: 15, float: true },
+  { src: 'popcorn2.png',      alt: 'Popcorn',       x: 90,   y: 64, w: 9.5,  r: 0,   z: 40 },
+];
+
+// small glowing dots / blobs
+const DOTS = [
+  { x: 15.5, y: 6,  s: 2.4, c: 'bg-purple-500' },
+  { x: 6,    y: 78, s: 2.2, c: 'bg-orange-400' },
+  { x: 63,   y: 8,  s: 3.6, c: 'bg-orange-400' },
+  { x: 68,   y: 35, s: 1.4, c: 'bg-purple-600' },
+  { x: 82,   y: 7,  s: 1.1, c: 'bg-orange-500' },
+  { x: 96,   y: 8,  s: 2.4, c: 'bg-indigo-500' },
+  { x: 94,   y: 82, s: 2,   c: 'bg-orange-400' },
+];
+
+const CATEGORIES = ['Movies', 'Gaming', 'Culinary', 'Music', 'Events', 'Podcasts'];
 
 const Landing = () => {
   const navigate = useNavigate();
 
-  const features = [
-    { icon: <Users className="h-6 w-6 text-purple-400" />, title: "Private Social Feed", desc: "Share moments, photos and status updates visible only to mutually accepted friends." },
-    { icon: <Film className="h-6 w-6 text-blue-400" />, title: "Movie Recommendations", desc: "Discover and contribute movie specifications, cast, and OTT availability." },
-    { icon: <Tv className="h-6 w-6 text-pink-400" />, title: "Web Series Catalog", desc: "Browse community Web Series listings, season details, and streaming platforms." },
-    { icon: <Gamepad2 className="h-6 w-6 text-green-400" />, title: "Gaming Hub", desc: "Curate lists of favorite console, PC, and mobile games." },
-    { icon: <MapPin className="h-6 w-6 text-yellow-400" />, title: "Places & Travel", desc: "Explore local spots and tourist destinations filtered by price and distance." },
-    { icon: <Utensils className="h-6 w-6 text-rose-400" />, title: "Restaurants & Dining", desc: "Find food recommendations, price tiers, and menus uploaded by foodies." }
-  ];
-
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-between text-slate-100 z-10 px-4 md:px-8">
-      <BubbleBackground />
-      <HomeSpider />
-      
-      {/* Landing Pill Header */}
-      <header className="w-full max-w-6xl mt-6 px-6 py-4 glass-nav rounded-full flex justify-between items-center z-10 animate-fade-in">
-        <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+    <div className="min-h-screen bg-[#fafbff] flex flex-col font-sans text-slate-900 relative overflow-x-hidden">
+      {/* Fixed Navbar */}
+      <header className="fixed top-0 left-0 right-0 w-full px-6 sm:px-12 py-4 flex justify-between items-center z-50 bg-[#fafbff]/80 backdrop-blur-md border-b border-slate-200/50">
+        <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+          <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-orange-500 via-fuchsia-600 to-indigo-600 bg-clip-text text-transparent">
             Nexora
           </span>
         </div>
         <div className="flex gap-4">
-          <button 
+          <button
             onClick={() => navigate('/login?tab=signin')}
-            className="px-4 py-2 text-sm font-medium hover:text-purple-400 transition"
+            className="px-7 py-2.5 text-sm font-medium text-slate-800 rounded-full border border-slate-800 bg-white hover:bg-slate-50 transition"
           >
-            Sign In
+            Login
           </button>
-          <button 
+          <button
             onClick={() => navigate('/login?tab=signup')}
-            className="px-5 py-2 text-sm font-semibold rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-md shadow-purple-500/10 hover:shadow-purple-500/20 transition-all transform hover:scale-105 active:scale-95"
+            className="px-7 py-2.5 text-sm font-semibold text-white rounded-full bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 shadow-lg shadow-purple-500/30 transition-all hover:scale-105 active:scale-95"
           >
-            Get Started
+            Sign Up
           </button>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main className="w-full max-w-6xl flex-grow flex flex-col items-center justify-center py-16 text-center z-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-sm font-medium mb-6">
-          <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
-          Introducing Nexora 2.0
-        </div>
-        
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-          Share <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent">Moments</span>.<br className="md:hidden" /> Discover <span className="bg-gradient-to-r from-blue-400 via-teal-400 to-purple-400 bg-clip-text text-transparent">Worlds</span>.
+      {/* Hero */}
+      <main className="flex-grow flex flex-col items-center pt-32 px-4 text-center z-10 w-full">
+        <h1 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.08] mb-6">
+          <span className="bg-gradient-to-r from-orange-500 via-fuchsia-600 to-indigo-600 bg-clip-text text-transparent">
+            All Your Favorites.
+          </span>
+          <br />
+          <span className="bg-gradient-to-r from-orange-500 via-fuchsia-600 to-indigo-600 bg-clip-text text-transparent">
+            One Place.
+          </span>
         </h1>
-        
-        <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed">
-          Blend a private, friend-gated social feed with an open, community-curated directory of movies, web series, games, places, and restaurants.
+
+        <p className="text-base md:text-lg text-slate-800 max-w-xl mb-8 leading-relaxed">
+          Discover the ultimate destination for endless entertainment. Stream movies, play games, and
+          explore culinary experiences instantly.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-16">
-          <button 
-            onClick={() => navigate('/login?tab=signup')}
-            className="px-8 py-4 font-semibold rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:opacity-90 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all transform hover:scale-105 active:scale-95"
-          >
-            Create Your Account
-          </button>
-          <button 
-            onClick={() => navigate('/login?tab=signin')}
-            className="px-8 py-4 font-semibold rounded-full border border-slate-700 hover:border-slate-500 bg-slate-900/60 hover:bg-slate-900/90 transition-all transform hover:scale-105 active:scale-95"
-          >
-            Access Discovery Hub
-          </button>
+        {/* Search bar */}
+        <div className="w-full max-w-xl relative mb-6 z-20">
+          <input
+            type="text"
+            placeholder="Explore movies, games, food..."
+            className="w-full pl-6 pr-14 py-4 rounded-full border border-slate-200 bg-white/80 shadow-lg shadow-slate-300/40 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-400 text-slate-800 placeholder:text-slate-400 transition-all"
+          />
+          <div className="absolute inset-y-0 right-6 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-slate-500" />
+          </div>
         </div>
 
-        {/* Feature Grid */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-          {features.map((feat, index) => (
-            <div key={index} className="glass p-6 rounded-2xl hover:bg-slate-900/40 hover:-translate-y-1 hover:border-slate-700 transition-all duration-300">
-              <div className="h-12 w-12 rounded-xl bg-slate-950 flex items-center justify-center mb-4 border border-slate-800">
-                {feat.icon}
-              </div>
-              <h3 className="text-lg font-bold mb-2 text-slate-100">{feat.title}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
+        {/* Categories */}
+        <div className="flex flex-wrap justify-center gap-3 mb-6 z-20">
+          {CATEGORIES.map((cat, i) => (
+            <span
+              key={cat}
+              className={`px-5 py-1.5 rounded-full text-sm cursor-pointer transition-all ${
+                i === 0
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'bg-white/70 text-slate-800 border border-slate-300 hover:bg-white hover:border-slate-400'
+              }`}
+            >
+              {cat}
+            </span>
+          ))}
+        </div>
+
+        {/* Floating gallery (matches mockup) */}
+        <div
+          className="relative w-full max-w-[1600px] mx-auto pointer-events-none -mt-16 sm:-mt-24"
+          style={{ aspectRatio: '1024 / 560' }}
+        >
+          {/* soft colour glows */}
+          <div className="absolute left-[-4%] top-[20%] w-[30%] h-[60%] rounded-full bg-orange-300/50 blur-3xl" />
+          <div className="absolute left-[40%] top-[15%] w-[25%] h-[50%] rounded-full bg-orange-300/40 blur-3xl" />
+          <div className="absolute right-[-4%] top-[15%] w-[34%] h-[70%] rounded-full bg-indigo-400/40 blur-3xl" />
+          <div className="absolute right-[2%] bottom-[0%] w-[22%] h-[40%] rounded-full bg-purple-400/40 blur-3xl" />
+
+          {/* dots */}
+          {DOTS.map((d, i) => (
+            <span
+              key={i}
+              className={`absolute rounded-full ${d.c} shadow-md`}
+              style={{ left: `${d.x}%`, top: `${d.y}%`, width: `${d.s}%`, aspectRatio: '1 / 1', zIndex: 10 }}
+            />
+          ))}
+
+          {GALLERY.map((it, i) => (
+            <div
+              key={i}
+              className={`absolute ${it.float ? 'animate-pulse' : ''}`}
+              style={{
+                left: `${it.x}%`,
+                top: `${it.y}%`,
+                width: `${it.w}%`,
+                height: it.card ? `${it.h}%` : 'auto',
+                transform: `rotate(${it.r}deg)`,
+                zIndex: it.z,
+              }}
+            >
+              {it.card ? (
+                <img
+                  src={IMG + it.src}
+                  alt={it.alt}
+                  className={`w-full h-full object-cover rounded-2xl shadow-2xl shadow-slate-900/25 ${
+                    it.glass ? 'border border-white/70 opacity-95' : ''
+                  }`}
+                />
+              ) : (
+                <img
+                  src={IMG + it.src}
+                  alt={it.alt}
+                  className="w-full h-auto drop-shadow-2xl"
+                />
+              )}
             </div>
           ))}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full max-w-6xl py-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 gap-4">
-        <span>© 2026 Nexora Inc. Share Moments. Discover Worlds.</span>
-        <div className="flex gap-6">
-          <a href="#" className="hover:text-slate-300 transition">Terms</a>
-          <a href="#" className="hover:text-slate-300 transition">Privacy</a>
-          <a href="#" className="hover:text-slate-300 transition">Security</a>
+      <footer className="w-full mt-12 py-6 px-6 sm:px-12 border-t border-slate-300 z-10 bg-[#fafbff]">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium text-slate-800">
+          <div className="flex flex-wrap justify-center md:justify-start gap-8">
+            <a href="#" className="hover:text-purple-600 transition-colors">About</a>
+            {/* <a href="#" className="hover:text-purple-600 transition-colors">Careers</a> */}
+            {/* <a href="#" className="hover:text-purple-600 transition-colors">Press</a> */}
+            {/* <a href="#" className="hover:text-purple-600 transition-colors">Terms</a> */}
+            <a href="mailto:nexora.entertainment18@gmail.com" className="hover:text-purple-600 transition-colors">
+              Support
+            </a>
+          </div>
+          <div className="font-normal text-slate-800">copyright @s-tech solutions 2026</div>
         </div>
       </footer>
     </div>
